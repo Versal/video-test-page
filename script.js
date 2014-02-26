@@ -16,16 +16,19 @@ $(function(){
       var index = i;
       var templateHTML = "<li><h2>" + urls[i] + "</h2>";
       var url = urls[i];
-      var callback = function(message, text,response) {
-        $list.append(templateHTML + '<h3>' + response.status + '</h3></li>');
-      }
 
       $.ajax({
         type:"HEAD",
         async: true,
         url: urls[i],
-        success: function(message, text, response) {
-          callback(message,text,response);
+        complete: function(jqXHR, textStatus) {
+          var xOrigin = jqXHR.getResponseHeader('X-Origin');
+          var xCache = jqXHR.getResponseHeader('X-Cache');
+
+          var template = templateHTML +'<h3>X-Cache: </h3><h4>' + xCache + '</h4>';
+          template += '<h3>X-Origin: </h3><h4>' + xOrigin + '</h4></li>';
+
+          $list.append(template);
         }
       });
     })();
