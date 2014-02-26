@@ -1,3 +1,4 @@
 ## Video Response Test Suite
 
-Template for easy response testing
+Sends Request to several sample videos
+Displays X-Cache and X-Origin data for testing purposes.
