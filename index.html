@@ -19,9 +19,11 @@
       h2 {
         font-size: 10px;
       }
-
+      .status {
+        font-size: 14px;
+      }
       .uuid {
-        font-size: 12px;
+        font-size: 14px;
         margin-left:10px;
       }
       h3 {
@@ -31,6 +33,95 @@
       h4 {
         margin-left: 30px;
         font-size: 10px;
+      }
+				@-webkit-keyframes expand {
+				  0% {
+				    -webkit-transform: scale(0);
+				  }
+
+				  50% {
+				    -webkit-transform: scale(1);
+				  }
+
+				  100% {
+				    z-index: 1;
+				  }
+				}
+				@-moz-keyframes expand {
+				  0% {
+				    -moz-transform: scale(0);
+				  }
+
+				  50% {
+				    -moz-transform: scale(1);
+				  }
+
+				  100% {
+				    z-index: 1;
+				  }
+				}
+				@-o-keyframes expand {
+				  0% {
+				    -o-transform: scale(0);
+				  }
+
+				  50% {
+				    -o-transform: scale(1);
+				  }
+
+				  100% {
+				    z-index: 1;
+				  }
+				}
+				@keyframes expand {
+				  0% {
+				    transform: scale(0);
+				  }
+
+				  50% {
+				    transform: scale(1);
+				  }
+
+				  100% {
+				    z-index: 1;
+				  }
+				}
+				.loader {
+				  position: absolute;
+				  left: 50%;
+				  top: 50%;
+				  margin: -20px 0 0 -20px;
+				  background-color: white;
+				  border-radius: 50%;
+				  box-shadow: 0 0 0 6.66667px #141414;
+				  width: 40px;
+				  height: 40px;
+				}
+				.loader:before, .loader:after {
+				  content: "";
+				  position: absolute;
+				  left: 50%;
+				  top: 50%;
+				  display: block;
+				  margin: -21px 0 0 -21px;
+				  border-radius: 50%;
+				  z-index: 2;
+				  width: 42px;
+				  height: 42px;
+				}
+				.loader:before {
+				  background-color: #141414;
+				  -webkit-animation: expand 1.6s linear infinite both;
+				  -moz-animation: expand 1.6s linear infinite both;
+				  animation: expand 1.6s linear infinite both;
+				}
+				.loader:after {
+				  background-color: white;
+				  -webkit-animation: expand 1.6s linear 0.8s infinite both;
+				  -moz-animation: expand 1.6s linear 0.8s infinite both;
+				  animation: expand 1.6s linear 0.8s infinite both;
+				}
+
       }
     </style>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> 
@@ -128,12 +219,14 @@
           'https://static-1.versal.com/restapi/assets/a749822b-bc66-4ea9-a7e7-375513d782ef','https://static-1.versal.com/restapi/assets/b48eb335-fe3b-41c3-97ca-12fa49264896',
           'https://static-1.versal.com/restapi/assets/44f72cf1-c1e3-44fa-b56c-87969e6449a9','https://static-1.versal.com/restapi/assets/c5b4762c-a4bf-41f1-a6d2-2fd6d42cf727',
           'https://static-1.versal.com/restapi/assets/73d38f30-a3bb-4e28-a7e7-030f7eea5635','https://static-1.versal.com/restapi/assets/3a5406e9-07f3-4d60-8c22-96ca3df2e900',
-          'https://static-1.versal.com/restapi/assets/07766eae-99ff-4aca-80ae-b606e8e6a80d',
-          'https://static.versal.com/restapi/assets/7182cb15-48c7-460b-96b3-e5087271d0fe'
+          'https://static-1.versal.com/restapi/assets/07766eae-99ff-4aca-80ae-b606e8e6a80d'
         ];
 
         var analyticsData = [];
         var $list = $('ul');
+        $list.hide();
+        $('.uuid').hide();
+        var $status = $('.loader');
         var promises = [];
 
         for(var i = 0; i < urls.length; i++){
@@ -164,12 +257,17 @@
         }
 
         whenAll(promises).always(function(){
-            console.log(analyticsData.length);
             $.ajax({
               type: 'POST',
               url: 'https://opstats.versal.com/appevents',
               contentType: 'application/json',
               data: JSON.stringify(analyticsData),
+              complete: function(){
+                console.log('complete');
+                $list.show();
+                $status.hide();
+                $('.uuid').show();
+              },
               headers: { "PERFAPIKEY": "7850233d431cba5c061ed95bc2f0e1d7" }
             })
         });
@@ -178,6 +276,7 @@
   </head>
   <body>
     <h1>Versal Video Testing</h1>
+     <div class="loader">Loading</div>
     <h2 class='uuid' >UUID: <span></span></h2>
     <ul>
     </ul>
