@@ -160,7 +160,8 @@
         }
 
         whenAll(promises).always(function(){
-          $.ajax({
+            console.log(analyticsData);
+            $.ajax({
             type: 'POST',
             url: 'https://opstats.versal.com/appevents',
             contentType: 'application/json',
@@ -168,9 +169,12 @@
             success: function(data){
               console.log('done');
               console.log(data);
-            }
-            headers: { "PERFAPIKEY": "7850233d431cba5c061ed95bc2f0e1d7" }
-          })
+            },
+            error: function(){
+              console.log('error');
+            },
+            headers: { "PERFAPIKEY": "" }
+            })
         });
       });
     </script>
