@@ -12,60 +12,199 @@
         padding: 10px;
         margin: 10px;
         border-radius: 3px;
-        min-height: 100px;
         background: lightgray;
+        float:left;
       }
 
+      h2 {
+        font-size: 10px;
+      }
+
+      .uuid {
+        font-size: 12px;
+        margin-left:10px;
+      }
       h3 {
         margin-left: 10px;
+        font-size: 10px;
       }
-
       h4 {
         margin-left: 30px;
+        font-size: 10px;
       }
     </style>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script> 
     <script>
+      function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+                   .toString(16)
+                   .substring(1);
+      };
+
+      function guid() {
+        return s4() + '-' + s4() + '-' + s4() + '-' + s4();
+      }
+
+      var hitOrMiss = function(xCache) {
+        if (!xCache) {return 0;}
+        var lowerXCache = xCache.toLowerCase();
+        if (lowerXCache.indexOf('hit') === -1) {
+          return 0;
+        } else {
+          return 1;
+        }
+      };
+
+      var buildAnalyticsData = function(xCache, xOrigin, type, url, uuid) {
+        var cache_i = hitOrMiss(xCache);
+        var origin_i = parseInt(xOrigin.charAt(0));
+        return {
+          "source_tsd": "gadget",
+          "event_tsd": "videotestbed",
+          "data": {
+            "cache_i": cache_i,
+            "origin_i": origin_i,
+            "asset_tsd": url,
+            "ctype_tsd": type,
+            "uuid_tsd": uuid
+          }
+        }
+      };
+
+      var whenAll = function(arr) {
+        return $.when.apply($, arr);
+      };
+
+
       $(function(){
+        $.ajaxSetup({
+          error: function (x, status, error) {
+            if (x.status == 403) {
+              alert("Sorry, your session has expired. Please login again to continue");
+              window.location.href ="/Account/Login";
+            }
+            else {
+              alert("An error occurred: " + status + "nError: " + error);
+            }
+          }
+        });
+
+        var UUID = guid();
+        $('.uuid span').html(UUID);
         var urls = [
-          'http://static-1.versal.com/restapi/assets/b9e45c2d-717a-471a-92e2-295ab7d5b3c8',
-          'http://static-1.versal.com/restapi/assets/40c18421-e26a-433f-9e7e-a43f775a91a3',
-          'http://static-1.versal.com/restapi/assets/ce5ba717-5d0b-46cb-93b7-95c5c05cb767',
-          'http://static-1.versal.com/restapi/assets/e793d208-1b46-466d-bc56-ffd4498154f7',
-          'http://static-1.versal.com/restapi/assets/a51e7b9a-3233-4323-8e2c-d4cdfb1f2a88',
-          'http://static-1.versal.com/restapi/assets/fbbc0a07-25c2-4278-9a96-5da49bebf596'
+          'http://static-1.versal.com/restapi/assets/fbbc0a07-25c2-4278-9a96-5da49bebf596',
+          'https://static-1.versal.com/restapi/assets/98b7266d-7878-4409-8bb0-0cd1c7e2c544',
+          'https://static-1.versal.com/restapi/assets/a180db04-e4ee-4921-9ec6-31213046d322',
+          'https://static-1.versal.com/restapi/assets/ad32de74-3531-4e39-abf9-92109121cf35',
+          'https://static-1.versal.com/restapi/assets/313c8059-6db9-42b5-899b-caa94a477054',
+          'https://static-1.versal.com/restapi/assets/802a4c7b-3a41-482e-996a-bff0c630ca5d',
+          'https://static-1.versal.com/restapi/assets/df9aa92d-277e-4b46-ab15-cf133db2f5e1',
+          'https://static-1.versal.com/restapi/assets/e31af85d-a7a9-4ebe-8ecf-22a9814ab8ff',
+          'https://static-1.versal.com/restapi/assets/b4c6a0b4-1149-4b8b-9c95-4a1ea069e77f',
+          'https://static-1.versal.com/restapi/assets/64d6a885-60b4-46a2-ab1f-6145339e691e',
+          'https://static-1.versal.com/restapi/assets/3fcf50f7-0d70-4f4d-9352-ad856ee425fc',
+          'https://static-1.versal.com/restapi/assets/434d97fe-6f2a-4d4f-8fff-a471aa05d503',
+          'https://static-1.versal.com/restapi/assets/8eec08ec-822c-4d57-bf80-d2f467180f0f',
+          'https://static-1.versal.com/restapi/assets/b93a5529-b6a1-47f9-b716-f29545ceaf5c',
+          'https://static-1.versal.com/restapi/assets/66dbf6ca-8f6d-476d-91f9-175f6f4b6d75',
+          'https://static-1.versal.com/restapi/assets/e460c932-54a0-4387-b63d-aa26f720f0e2',
+          'https://static-1.versal.com/restapi/assets/fda61371-8725-4592-9bfc-c0edf85c6f7e',
+          'https://static-1.versal.com/restapi/assets/9efd1f80-4559-415a-aa8d-61bf4dc01ebc',
+          'https://static-1.versal.com/restapi/assets/4b293ac8-d8c1-4933-b080-bfdbce5615ac',
+          'https://static-1.versal.com/restapi/assets/bdfc98bd-b540-465c-a44f-b13811d0cc13',
+          'https://static-1.versal.com/restapi/assets/bd0f602a-b6a0-44ad-8e93-8d39cfee67d4',
+          'https://static-1.versal.com/restapi/assets/a51e7b9a-3233-4323-8e2c-d4cdfb1f2a88',
+          'https://static-1.versal.com/restapi/assets/88daf357-7396-4c14-b794-36453f5ea586',
+          'https://static-1.versal.com/restapi/assets/dc40cd3a-b7f0-47ce-806f-8f7c03856f5c',
+          'https://static-1.versal.com/restapi/assets/c3271333-eec2-4d72-ae53-bc1e687cf95d',
+          'https://static-1.versal.com/restapi/assets/535f0d2c-34f3-4df8-841b-6feb51763715',
+          'https://static-1.versal.com/restapi/assets/e0ecfb21-8913-454c-ac8d-9f3f3ba13218',
+          'https://static-1.versal.com/restapi/assets/f3ca6924-2d70-4cef-bf66-b548d00c64f5',
+          'https://static-1.versal.com/restapi/assets/fcfec205-df4f-4362-ad22-19e98110cf2d',
+          'https://static-1.versal.com/restapi/assets/d06d404f-888e-4a4b-80c1-ccefe5763475',
+          'https://static-1.versal.com/restapi/assets/7182cb15-48c7-460b-96b3-e5087271d0fe',
+          'https://static-1.versal.com/restapi/assets/8ee75c15-7b91-4441-bcaa-564c41f564ff',
+          'https://static-1.versal.com/restapi/assets/dc641253-8da6-47ff-8432-1474bdf7f219',
+          'https://static-1.versal.com/restapi/assets/f433c1c5-6654-4935-9a20-f631edbf0efa',
+          'https://static-1.versal.com/restapi/assets/07ba9738-52c2-453c-991c-e6bf7b05ec24',
+          'https://static-1.versal.com/restapi/assets/ebc6123a-8fa2-4142-ad31-8735d296efaf',
+          'https://static-1.versal.com/restapi/assets/07ba9738-52c2-453c-991c-e6bf7b05ec24',
+          'https://static-1.versal.com/restapi/assets/b9e45c2d-717a-471a-92e2-295ab7d5b3c8',
+					'https://static-1.versal.com/restapi/assets/a85b83f0-2baa-4a48-bb6a-aaced801f8df',
+          'https://static-1.versal.com/restapi/assets/2d38d6e0-3ce1-4de9-950b-cbb96b721793',
+          'https://static-1.versal.com/restapi/assets/b657574f-f035-487d-acd7-a8a0906de515',
+          'https://static-1.versal.com/restapi/assets/abd6995d-cd93-4f0e-b998-3773bed88759',
+          'https://static-1.versal.com/restapi/assets/3185ff19-3046-46f2-a921-74798705fd53',
+          'https://static-1.versal.com/restapi/assets/d5a64ae1-97fb-4fa7-8077-b2470c89ea18',
+          'https://static-1.versal.com/restapi/assets/f4a80755-cd90-4010-8936-5b73ff66760b',
+          'https://static-1.versal.com/restapi/assets/18a9a6ac-9b42-46ad-b651-5ded7be5bea5',
+          'https://static-1.versal.com/restapi/assets/6612a2f4-ef3a-45b3-9a9d-156e7cfe2a10',
+          'https://static-1.versal.com/restapi/assets/7170c300-ef4c-49b5-adc2-174885acea67',
+          'https://static-1.versal.com/restapi/assets/1d9d6a74-4001-4dd0-a19f-c731ba7e92ad',
+          'https://static-1.versal.com/restapi/assets/5eb9a8c6-fab2-4c3e-b676-e1a0d76e3dfd',
+          'https://static-1.versal.com/restapi/assets/9ac38191-3606-48d4-9288-fc80cb778880',
+          'https://static-1.versal.com/restapi/assets/ba7c4fa3-42f2-4f60-9c7c-ceb26c514157',
+          'https://static-1.versal.com/restapi/assets/287bf984-9493-4622-a28b-4a2fea7d5c99',
+          'https://static-1.versal.com/restapi/assets/79efdbcd-3b52-48b1-a464-462d17afe79b',
+          'https://static-1.versal.com/restapi/assets/01df721f-d73e-440e-9b42-21d9d678e49c',
+          'https://static-1.versal.com/restapi/assets/80952c91-7541-4492-8c2e-3e0917b4b431',
+          'https://static-1.versal.com/restapi/assets/27f6fca5-b7e9-4ab9-8fed-4712905964e9',
+          'https://static-1.versal.com/restapi/assets/902aa5da-c660-4eed-aa3b-d771a799b6db',
+          'https://static-1.versal.com/restapi/assets/9ac71947-4564-4cfa-8e59-741f96a8072a',
+          'https://static-1.versal.com/restapi/assets/e793d208-1b46-466d-bc56-ffd4498154f7',
+          'https://static-1.versal.com/restapi/assets/33c96a3a-de9b-46e4-903a-5329cd723d76',
+          'https://static-1.versal.com/restapi/assets/a26fed8b-2ba9-4af9-a256-10f560ff7bef',
+          'https://static-1.versal.com/restapi/assets/442179d6-0dd3-45ab-96d4-2a842fe30aa6',
+          'https://static-1.versal.com/restapi/assets/59ef83ca-729f-4f0d-b069-89866732593a',
+          'https://static-1.versal.com/restapi/assets/48901ae3-7602-40ca-8dbb-8ccd32a82150',
+          'https://static-1.versal.com/restapi/assets/af12f9ee-d074-4895-b59c-a980d01febf9',
+          'https://static-1.versal.com/restapi/assets/a749822b-bc66-4ea9-a7e7-375513d782ef',
+          'https://static-1.versal.com/restapi/assets/b48eb335-fe3b-41c3-97ca-12fa49264896',
+          'https://static-1.versal.com/restapi/assets/44f72cf1-c1e3-44fa-b56c-87969e6449a9',
+          'https://static-1.versal.com/restapi/assets/c5b4762c-a4bf-41f1-a6d2-2fd6d42cf727',
+          'https://static-1.versal.com/restapi/assets/73d38f30-a3bb-4e28-a7e7-030f7eea5635',
+          'https://static-1.versal.com/restapi/assets/3a5406e9-07f3-4d60-8c22-96ca3df2e900',
+          'https://static-1.versal.com/restapi/assets/07766eae-99ff-4aca-80ae-b606e8e6a80d'
         ];
+
+        var analyticsData = [];
         var $list = $('ul');
+        var promises = [];
+
         for(var i = 0; i < urls.length; i++){
           // Needs self calling function to include index
           // (and as a result url) in its closure
           // for ajax call
           (function() {
-            var index = i;
-            var templateHTML = "<li><h2>" + urls[i] + "</h2>";
-            var url = urls[i];
-
-            $.ajax({
+           var url = urls[i];
+           promises.push($.ajax({
               type:"HEAD",
               async: true,
               url: urls[i],
-              complete: function(jqXHR, textStatus) {
+              complete: function(jqXHR, responseText){
                 var xOrigin = jqXHR.getResponseHeader('X-Origin');
                 var xCache = jqXHR.getResponseHeader('X-Cache');
-
-                var template = templateHTML +'<h3>X-Cache: </h3><h4>' + xCache + '</h4>';
+                var type = jqXHR.getResponseHeader('Content-Type');
+                var template = "<li><h2>" + url + "</h2>";
+                template += '<h3>X-Cache: </h3><h4>' + xCache + '</h4>';
                 template += '<h3>X-Origin: </h3><h4>' + xOrigin + '</h4></li>';
-
                 $list.append(template);
+                analyticsData.push(buildAnalyticsData(xCache, xOrigin, type, url, UUID));
               }
-            });
+            }));
           })();
         }
+
+        whenAll(promises).always(function(){
+          console.log(analyticsData);
+          console.log(analyticsData.length);
+        });
       });
     </script>
   </head>
   <body>
     <h1>Versal Video Testing</h1>
+    <h2 class='uuid' >UUID: <span></span></h2>
     <ul>
     </ul>
   </body>
