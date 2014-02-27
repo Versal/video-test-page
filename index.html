@@ -154,26 +154,23 @@
                 template += '<h3>X-Origin: </h3><h4>' + xOrigin + '</h4></li>';
                 $list.append(template);
                 analyticsData.push(buildAnalyticsData(xCache, xOrigin, type, url, UUID));
-              }
+              },
+              error: function(){
+                console.log('error');
+                return;
+              },
             }));
           })();
         }
 
         whenAll(promises).always(function(){
-            console.log(analyticsData);
+            console.log(analyticsData.length);
             $.ajax({
-            type: 'POST',
-            url: 'https://opstats.versal.com/appevents',
-            contentType: 'application/json',
-            data: JSON.stringify(analyticsData),
-            success: function(data){
-              console.log('done');
-              console.log(data);
-            },
-            error: function(){
-              console.log('error');
-            },
-            headers: { "PERFAPIKEY": "" }
+              type: 'POST',
+              url: 'https://opstats.versal.com/appevents',
+              contentType: 'application/json',
+              data: JSON.stringify(analyticsData),
+              headers: { "PERFAPIKEY": "" }
             })
         });
       });
